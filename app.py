@@ -62,24 +62,44 @@ class CompaniesHouseTracker:
     
     def search_companies_by_location(self, postcode: str):
         url = f"{self.base_url}/advanced-search/companies"
-        params = {
-            "location": postcode,
-            "company_status": "active",
-            "size": 100
-        }
-        
-        try:
-            response = requests.get(
-                url,
-                params=params,
-                auth=(self.api_key, ""),
-                timeout=10
-            )
-            response.raise_for_status()
-            return response.json().get("items", [])
-        except Exception as e:
-            print(f"Error searching {postcode}: {str(e)}")
-            return []
+        all_companies = []
+        start_index = 0
+
+        while True:
+            params = {
+                "location": postcode,
+                "company_status": "active",
+                "size": 100,
+                "start_index": start_index
+            }
+
+            try:
+                response = requests.get(
+                    url,
+                    params=params,
+                    auth=(self.api_key, ""),
+                    timeout=10
+                )
+                response.raise_for_status()
+                data = response.json()
+                items = data.get("items", [])
+
+                if not items:
+                    break
+
+                all_companies.extend(items)
+
+                # Check if there are more results
+                total_results = data.get("total_results", 0)
+                if start_index + len(items) >= total_results:
+                    break
+
+                start_index += 100
+            except Exception as e:
+                print(f"Error searching {postcode} at index {start_index}: {str(e)}")
+                break
+
+        return all_companies
     
     def get_filing_history(self, company_number: str, days_back: int = 90):
         url = f"{self.base_url}/company/{company_number}/filing-history"
