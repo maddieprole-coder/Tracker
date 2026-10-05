@@ -211,11 +211,12 @@ def index():
 def start_scan():
     global tracker
     data = request.json
-    api_key = data.get('api_key')
-    
+    # Use hardcoded API key or from request
+    api_key = data.get('api_key') or "70fbf4df-44bc-4598-9673-577e38ded898"
+
     if not api_key:
         return jsonify({"error": "API key required"}), 400
-    
+
     tracker = CompaniesHouseTracker(api_key)
     
     def progress_callback(status):
