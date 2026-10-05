@@ -331,16 +331,6 @@
 
                 <form id="scanForm">
                     <div class="form-group">
-                        <label for="apiKey">Companies House API Key</label>
-                        <input
-                            type="password"
-                            id="apiKey"
-                            placeholder="Paste your API key"
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
                         <label>Coverage</label>
                         <textarea readonly style="min-height: 100px; background: #f9f9f9;">Scanning 40+ central London postcodes:
 - City of London (EC1-EC4)
@@ -398,15 +388,9 @@
         document.getElementById('scanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const apiKey = document.getElementById('apiKey').value;
             const scanButton = document.getElementById('scanButton');
             const statusMessage = document.getElementById('statusMessage');
             const scanProgress = document.getElementById('scanProgress');
-
-            if (!apiKey) {
-                showStatus('API key is required', 'error');
-                return;
-            }
 
             scanButton.disabled = true;
             scanButton.textContent = 'Scanning...';
@@ -418,7 +402,7 @@
                 const startResponse = await fetch('/api/start-scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ api_key: apiKey })
+                    body: JSON.stringify({})
                 });
 
                 if (!startResponse.ok) {
