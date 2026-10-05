@@ -122,12 +122,11 @@ class CompaniesHouseTracker:
             for filing in response.json().get("items", []):
                 filing_date = datetime.strptime(filing.get("date", ""), "%Y-%m-%d")
 
-                # Include all filing types (not just AD01 address changes)
-                if filing_date >= cutoff_date:
+                # Only AD01 filings (address changes) - actual office moves
+                if filing.get("type") == "AD01" and filing_date >= cutoff_date:
                     filings.append({
                         "date": filing.get("date"),
-                        "days_ago": (datetime.now() - filing_date).days,
-                        "type": filing.get("type")
+                        "days_ago": (datetime.now() - filing_date).days
                     })
 
             return filings
