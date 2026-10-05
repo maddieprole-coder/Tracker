@@ -107,7 +107,7 @@ class CompaniesHouseTracker:
     
     def get_filing_history(self, company_number: str, days_back: int = 90):
         url = f"{self.base_url}/company/{company_number}/filing-history"
-        
+
         try:
             response = requests.get(
                 url,
@@ -115,19 +115,21 @@ class CompaniesHouseTracker:
                 timeout=10
             )
             response.raise_for_status()
-            
+
             filings = []
             cutoff_date = datetime.now() - timedelta(days=days_back)
-            
+
             for filing in response.json().get("items", []):
                 filing_date = datetime.strptime(filing.get("date", ""), "%Y-%m-%d")
-                
-                if filing.get("type") == "AD01" and filing_date >= cutoff_date:
+
+                # Include all filing types (not just AD01 address changes)
+                if filing_date >= cutoff_date:
                     filings.append({
                         "date": filing.get("date"),
-                        "days_ago": (datetime.now() - filing_date).days
+                        "days_ago": (datetime.now() - filing_date).days,
+                        "type": filing.get("type")
                     })
-            
+
             return filings
         except Exception as e:
             return []
