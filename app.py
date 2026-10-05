@@ -182,13 +182,13 @@ class CompaniesHouseTracker:
             
             for company in companies:
                 company_number = company.get("company_number")
-                company_name = company.get("title")
-                
+
                 filings = self.get_filing_history(company_number)
-                
+
                 if filings:
                     details = self.get_company_details(company_number)
-                    
+                    company_name = details.get("name")  # Get name from details
+
                     for filing in filings:
                         self.results.append({
                             "location": property_name,
