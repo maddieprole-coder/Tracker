@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from io import StringIO, BytesIO
 import csv
 import threading
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -94,6 +95,8 @@ class CompaniesHouseTracker:
                 if start_index + len(items) >= total_results:
                     break
 
+                # Add delay between paginated requests to respect API limits
+                time.sleep(0.5)
                 start_index += 100
             except Exception as e:
                 print(f"Error searching {postcode} at index {start_index}: {str(e)}")
@@ -166,6 +169,9 @@ class CompaniesHouseTracker:
                 })
             
             companies = self.search_companies_by_location(postcode)
+
+            # Add delay between postcode searches
+            time.sleep(0.3)
             
             for company in companies:
                 company_number = company.get("company_number")
