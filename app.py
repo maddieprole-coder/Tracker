@@ -16,6 +16,7 @@ class CompaniesHouseTracker:
         self.base_url = "https://api.company-information.service.gov.uk"
         self.results = []
         self.scan_status = "idle"
+        self.progress = {}
         
         self.properties = {
             "City of London - EC1A": "EC1A",
@@ -156,17 +157,21 @@ class CompaniesHouseTracker:
     def run_scan(self, progress_callback=None):
         self.results = []
         self.scan_status = "running"
+        self.progress = {}
         total_postcodes = len(self.properties)
-        
+
         for idx, (property_name, postcode) in enumerate(self.properties.items()):
+            progress_data = {
+                "status": "scanning",
+                "current": idx + 1,
+                "total": total_postcodes,
+                "location": property_name,
+                "results_found": len(self.results)
+            }
+            self.progress = progress_data
+
             if progress_callback:
-                progress_callback({
-                    "status": "scanning",
-                    "current": idx + 1,
-                    "total": total_postcodes,
-                    "location": property_name,
-                    "results_found": len(self.results)
-                })
+                progress_callback(progress_data)
             
             companies = self.search_companies_by_location(postcode)
 
@@ -237,14 +242,15 @@ def start_scan():
 @app.route('/api/results')
 def get_results():
     global tracker
-    
+
     if not tracker:
         return jsonify({"error": "No scan in progress"}), 400
-    
+
     return jsonify({
         "status": tracker.scan_status,
         "results": tracker.results,
-        "count": len(tracker.results)
+        "count": len(tracker.results),
+        **tracker.progress
     })
 
 @app.route('/api/download-csv')
